@@ -1,8 +1,9 @@
 import Note from "../models/noteModel";
 
-async function getNote() {
+async function getNote(user) {
   try {
-    const notes = await Note.find();
+    const notes = await Note.find({ user: user });
+
     return notes;
   } catch (e) {}
 }

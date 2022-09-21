@@ -1,32 +1,30 @@
 import Header from "../components/Header";
 import CustomTextField from "../components/TextField";
-import { Box, Grid, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import NoteCard from "../components/Note";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import {
-  createRequest,
-  deleteRequest,
-  updateRequest,
-} from "../service/request";
+import { createRequest, deleteRequest } from "../service/request";
 import CustomModal from "../components/modal";
 import { useRouter } from "next/router";
+import jasonweb from "jsonwebtoken";
 
-function Home(props) {
-  const router = useRouter();
+function Home({ doc }) {
   const [note, setNote] = useState("");
   const [notes, setGetNotes] = useState([]);
   const [editableNote, setEditableNote] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [noteId, setNoteId] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     axios({
       method: "get",
       url: "/api/note/crud",
-      data: {
-        text: note,
+
+      headers: {
+        user: doc.user,
       },
     })
       .then((response) => {
@@ -34,6 +32,21 @@ function Home(props) {
       })
       .catch((error) => {});
   }, [notes]);
+
+  // const getNotes = () => {
+  //   axios({
+  //     method: "get",
+  //     url: "/api/note/crud",
+  //
+  //     headers: {
+  //       user: doc.user,
+  //     },
+  //   })
+  //     .then((response) => {
+  //       setGetNotes(response.data);
+  //     })
+  //     .catch((error) => {});
+  // };
 
   function getInput(e) {
     e.preventDefault();
@@ -43,7 +56,7 @@ function Home(props) {
     e.preventDefault();
     if (note === "") {
     } else {
-      await createRequest("/api/note/crud", note);
+      await createRequest("/api/note/crud", note, doc.user);
       setNote("");
     }
   }
@@ -83,7 +96,7 @@ function Home(props) {
         display="flex"
       >
         {notes.length <= 0 ? (
-          <h1>Take a Note</h1>
+          <h1>Take a Note </h1>
         ) : (
           notes.map((note) => {
             let editable = false;
@@ -122,3 +135,48 @@ function Home(props) {
 }
 
 export default Home;
+
+export const getServerSideProps = async ({ req }) => {
+  const { jwt } = req.cookies;
+
+  if (!jwt) {
+    return {
+      redirect: {
+        source: "/",
+        destination: "/signin",
+        permanent: true,
+      },
+    };
+  } else {
+    const data = await jasonweb.verify(jwt, process.env.JWT_KEY);
+
+    // await jasonweb.verify(jwt, process.env.JWT_KEY, (error, doc) => {
+    //   if (!error) {
+    //     return {
+    //       props: { message: `Next.js is awesome` },
+    //     };
+    //   } else {
+    //     console.log(error);
+    //     return {
+    //       redirect: {
+    //         source: "/",
+    //         destination: "/signin",
+    //         permanent: true,
+    //       },
+    //     };
+    //   }
+    // });
+    if (data) {
+      return {
+        props: {
+          doc: data,
+        },
+      };
+    }
+    return {
+      props: {
+        doc: "null",
+      },
+    };
+  }
+};

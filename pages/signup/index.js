@@ -13,12 +13,14 @@ import { useState } from "react";
 import axios from "axios";
 
 import validator from "validator";
+import { useRouter } from "next/router";
 
 function Index(props) {
   const [show, showPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const router = useRouter();
 
   function show_password(e) {
     showPassword((prevState) => !prevState);
@@ -43,8 +45,8 @@ function Index(props) {
       })
         .then((response) => {
           if (response.data) {
-            const { token } = response.data;
-            localStorage.setItem("token", token);
+            router.push("/");
+            console.log("singddddd up");
           }
         })
         .catch((error) => {});
@@ -144,6 +146,9 @@ function Index(props) {
             },
           }}
           variant="outlined"
+          onClick={() => {
+            router.replace("/signin");
+          }}
         >
           LogIn
         </Button>

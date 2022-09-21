@@ -9,7 +9,7 @@ import {
 export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
-      const note = await getNote();
+      const note = await getNote(req.headers.user);
       return res.status(200).json(note);
     } else if (req.method === "POST") {
       const note = await createNote(req.body);
