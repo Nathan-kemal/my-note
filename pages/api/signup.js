@@ -4,6 +4,7 @@ import User from "../../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { setCookie, getCookie } from "cookies-next";
+import { createToken } from "../../service/tokenHandler";
 
 async function handler(req, res) {
   if (req.method === "POST") {
@@ -16,13 +17,7 @@ async function handler(req, res) {
         email: email,
         password: hashedPassword,
       });
-      const token = await jwt.sign(
-        { email: email, user: user._id },
-        process.env.JWT_KEY,
-        {
-          expiresIn: "30d",
-        }
-      );
+      const token = await createToken(email, user);
 
       setCookie("jwt", token, { req, res, maxAge: 60 * 60 * 24 });
 

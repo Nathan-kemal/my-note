@@ -3,7 +3,6 @@ import Note from "../models/noteModel";
 async function getNote(user) {
   try {
     const notes = await Note.find({ user: user });
-
     return notes;
   } catch (e) {}
 }

@@ -8,7 +8,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
-
+import { Circles } from "react-loader-spinner";
 import { useState } from "react";
 import axios from "axios";
 
@@ -20,6 +20,9 @@ function Index(props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [isLoading, setisLoading] = useState(false);
+  const [iserror, setisError] = useState(false);
   const router = useRouter();
 
   function show_password(e) {
@@ -45,13 +48,16 @@ function Index(props) {
       })
         .then((response) => {
           if (response.data) {
+            setisLoading(true);
             router.push("/");
-            console.log("singddddd up");
           }
         })
-        .catch((error) => {});
+        .catch((error) => {
+          setisLoading(false);
+        });
     } else {
       console.log(`error ${email} ${password} ${confirmPassword}`);
+      setisError(true);
     }
   }
   return (
@@ -90,9 +96,11 @@ function Index(props) {
         <TextField
           // error={validator.isEmail(email)}
           // helperText="Incorect email"
+
           sx={{
             width: "80%",
           }}
+          error={iserror}
           id="outlined-basic"
           label="email"
           variant="outlined"
@@ -101,6 +109,7 @@ function Index(props) {
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
+          error={iserror}
           sx={{
             width: "80%",
           }}
@@ -115,6 +124,7 @@ function Index(props) {
           sx={{
             width: "80%",
           }}
+          error={iserror}
           id="outlined-basic"
           label="confirm password"
           variant="outlined"
@@ -152,6 +162,13 @@ function Index(props) {
         >
           LogIn
         </Button>
+        <Circles
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="circles-loading"
+          visible={isLoading}
+        />
       </Stack>
     </Box>
   );

@@ -9,6 +9,7 @@ import { createRequest, deleteRequest } from "../service/request";
 import CustomModal from "../components/modal";
 import { useRouter } from "next/router";
 import jasonweb from "jsonwebtoken";
+import { verifyToken } from "../service/tokenHandler";
 
 function Home({ doc }) {
   const [note, setNote] = useState("");
@@ -32,21 +33,6 @@ function Home({ doc }) {
       })
       .catch((error) => {});
   }, [notes]);
-
-  // const getNotes = () => {
-  //   axios({
-  //     method: "get",
-  //     url: "/api/note/crud",
-  //
-  //     headers: {
-  //       user: doc.user,
-  //     },
-  //   })
-  //     .then((response) => {
-  //       setGetNotes(response.data);
-  //     })
-  //     .catch((error) => {});
-  // };
 
   function getInput(e) {
     e.preventDefault();
@@ -148,25 +134,9 @@ export const getServerSideProps = async ({ req }) => {
       },
     };
   } else {
-    const data = await jasonweb.verify(jwt, process.env.JWT_KEY);
-
-    // await jasonweb.verify(jwt, process.env.JWT_KEY, (error, doc) => {
-    //   if (!error) {
-    //     return {
-    //       props: { message: `Next.js is awesome` },
-    //     };
-    //   } else {
-    //     console.log(error);
-    //     return {
-    //       redirect: {
-    //         source: "/",
-    //         destination: "/signin",
-    //         permanent: true,
-    //       },
-    //     };
-    //   }
-    // });
+    const data = await verifyToken(jwt);
     if (data) {
+      console.log(data);
       return {
         props: {
           doc: data,
