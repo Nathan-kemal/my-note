@@ -1,52 +1,39 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-export const createRequest = async (url, text, user) => {
-  await axios({
+export const createRequest = async ({ text, user }) => {
+  const response = await axios({
     method: "post",
-    url: url,
+    url: "/api/note/crud",
     data: {
       text: text,
       user: user,
     },
-  })
-    .then((response) => {
-      toast("Note Added", {
-        type: "success",
-      });
-    })
-    .catch((error) => {});
+  });
+  return response.data;
 };
 
-export const deleteRequest = async (url, id) => {
-  await axios({
+export const deleteRequest = async (id) => {
+  const response = await axios({
     method: "delete",
-    url: url,
+    url: "/api/note/crud",
     data: {
       id: id,
     },
-  })
-    .then((response) => {
-      toast("Note Deleted", {
-        type: "warning",
-      });
-    })
-    .catch((error) => {});
+  });
+
+  return response.data;
 };
 
-export const updateRequest = async (url, id, text) => {
-  await axios({
+export const updateRequest = async ({ id, text }) => {
+  const response = await axios({
     method: "put",
-    url: url,
+    url: "/api/note/crud",
     data: {
       id: id,
       text: text,
     },
-  })
-    .then((response) => {
-      toast("Note edited", {
-        type: "success",
-      });
-    })
-    .catch((error) => {});
+  });
+
+  return response.data;
 };

@@ -5,49 +5,70 @@ import NoteCard from "../components/Note";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { createRequest, deleteRequest } from "../service/request";
+import {
+  createRequest,
+  deleteRequest,
+  updateRequest,
+} from "../service/request";
 import CustomModal from "../components/modal";
 import { useRouter } from "next/router";
-import jasonweb from "jsonwebtoken";
 import { verifyToken } from "../service/tokenHandler";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 function Home({ doc }) {
   const [note, setNote] = useState("");
-  const [notes, setGetNotes] = useState([]);
   const [editableNote, setEditableNote] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [noteId, setNoteId] = useState("");
-  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    axios({
-      method: "get",
-      url: "/api/note/crud",
-
-      headers: {
-        user: doc.user,
-      },
-    })
-      .then((response) => {
-        setGetNotes(response.data);
-      })
-      .catch((error) => {});
-  }, [notes]);
+  const query = useQuery(
+    ["todos"],
+    async () =>
+      await axios({
+        method: "get",
+        url: "/api/note/crud",
+        headers: {
+          user: doc.user,
+        },
+      }).then((response) => response.data)
+  );
 
   function getInput(e) {
     e.preventDefault();
     setNote(e.target.value);
   }
+
+  const addMutation = useMutation(createRequest, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    },
+  });
+
+  const deleteMutation = useMutation(deleteRequest, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["todos"]);
+    },
+  });
+
   async function add_note(e) {
     e.preventDefault();
     if (note === "") {
     } else {
-      await createRequest("/api/note/crud", note, doc.user);
+      const data = { text: note, user: doc.user };
+      addMutation.mutate(data);
       setNote("");
+      toast("Note Added", {
+        type: "success",
+      });
     }
   }
+
   async function delete_note(id) {
-    await deleteRequest("/api/note/crud", id);
+    deleteMutation.mutate(id);
+    toast("Note Deleted", {
+      type: "warning",
+    });
   }
 
   async function update_note(id, text) {
@@ -81,24 +102,20 @@ function Home({ doc }) {
         flexDirection="row"
         display="flex"
       >
-        {notes.length <= 0 ? (
-          <h1>Take a Note </h1>
-        ) : (
-          notes.map((note) => {
-            let editable = false;
+        {query.data?.map((note) => {
+          let editable = false;
 
-            return (
-              <NoteCard
-                key={note._id}
-                text={note.text}
-                id={note._id}
-                date={note.createdAt}
-                deleteNote={(e) => delete_note(note._id)}
-                editNote={(e) => update_note(note._id, note.text)}
-              />
-            );
-          })
-        )}
+          return (
+            <NoteCard
+              key={note._id}
+              text={note.text}
+              id={note._id}
+              date={note.createdAt}
+              deleteNote={(e) => delete_note(note._id)}
+              editNote={(e) => update_note(note._id, note.text)}
+            />
+          );
+        })}
       </Box>
       {openModal && (
         <CustomModal
