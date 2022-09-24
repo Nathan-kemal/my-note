@@ -38,7 +38,6 @@ export default function CustomModal({
 
   async function update_note() {
     if (text === editText) {
-      console.log("The same");
     } else {
       const data = { id: id, text: editText };
       updateMutation.mutate(data);

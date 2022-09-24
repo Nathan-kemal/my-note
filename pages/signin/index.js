@@ -32,7 +32,6 @@ function Index(props) {
           if (response.data) {
             setisLoading(false);
             router.push("/");
-            console.log(response.data);
           }
         })
         .catch((error) => {
@@ -41,7 +40,6 @@ function Index(props) {
     } else {
       setisLoading(false);
       setisError(true);
-      console.log(`error ${email} ${password}`);
     }
   }
 
@@ -145,7 +143,6 @@ export const getServerSideProps = async (context) => {
   const { jwt } = context.req.cookies;
 
   if (!jwt) {
-    console.log("no token");
     return {
       props: {},
     };

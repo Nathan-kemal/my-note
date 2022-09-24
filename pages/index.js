@@ -14,6 +14,7 @@ import CustomModal from "../components/modal";
 import { useRouter } from "next/router";
 import { verifyToken } from "../service/tokenHandler";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Circles } from "react-loader-spinner";
 
 function Home({ doc }) {
   const [note, setNote] = useState("");
@@ -22,7 +23,7 @@ function Home({ doc }) {
   const [noteId, setNoteId] = useState("");
   const queryClient = useQueryClient();
 
-  const query = useQuery(
+  const { isLoading, error, data } = useQuery(
     ["todos"],
     async () =>
       await axios({
@@ -102,9 +103,14 @@ function Home({ doc }) {
         flexDirection="row"
         display="flex"
       >
-        {query.data?.map((note) => {
-          let editable = false;
-
+        <Circles
+          height="80"
+          width="80"
+          color="#4fa94d"
+          ariaLabel="circles-loading"
+          visible={isLoading}
+        />
+        {data?.map((note) => {
           return (
             <NoteCard
               key={note._id}
@@ -153,7 +159,6 @@ export const getServerSideProps = async ({ req }) => {
   } else {
     const data = await verifyToken(jwt);
     if (data) {
-      console.log(data);
       return {
         props: {
           doc: data,
